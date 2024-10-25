@@ -26,11 +26,10 @@ pub fn load_tokenizer() -> Result<Tokenizer, c_int> {
         SQLITE_INTERNAL
     })?;
     let config_reader = BufReader::new(config_file);
-    let config: TokenizerConfig =
-        serde_json::from_reader(config_reader).map_err(|e| {
-            eprintln!("Failed to create tokenizer: {}", e);
-            SQLITE_INTERNAL
-        })?;
+    let config: TokenizerConfig = serde_json::from_reader(config_reader).map_err(|e| {
+        eprintln!("Failed to create tokenizer: {}", e);
+        SQLITE_INTERNAL
+    })?;
     let tokenizer = Tokenizer::from_config(&config).map_err(|e| {
         eprintln!("Failed to create tokenizer: {}", e);
         SQLITE_INTERNAL
@@ -151,7 +150,7 @@ mod tests {
 
     #[test]
     fn it_emits_segments() {
-        let input = "東京都は雨が降りそうです";
+        let input = "Ｌｉｎｄｅｒａは形態素解析ｴﾝｼﾞﾝです。ユーザー辞書も利用可能です。";
         let mut tokens: Vec<(String, c_int, c_int)> = vec![];
 
         let mut tokenizer = Fts5Tokenizer {
@@ -169,11 +168,14 @@ mod tests {
         assert_eq!(
             tokens,
             [
-                ("東京", 0, 6),
-                ("都", 6, 9),
-                ("雨", 12, 15),
-                ("降りる", 18, 24),
-                ("そう", 24, 30)
+                ("lindera", 0, 21),
+                ("形態素", 24, 33),
+                ("解析", 33, 39),
+                ("エンシ\u{3099}ン", 39, 54),
+                ("ユーサ\u{3099}", 63, 75),
+                ("辞書", 75, 81),
+                ("利用", 84, 90),
+                ("可能", 90, 96)
             ]
             .map(|(s, start, end)| (s.to_owned(), start, end))
         );
