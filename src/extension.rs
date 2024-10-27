@@ -383,7 +383,7 @@ pub extern "C" fn fts5_create_lindera_tokenizer(
     unsafe {
         *fts5_tokenizer = Box::into_raw(tokenizer);
     }
-    
+
     SQLITE_OK
 }
 
