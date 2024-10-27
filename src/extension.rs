@@ -366,7 +366,7 @@ fn lindera_fts_tokenizer_internal_init(
         fts5_destroy_icu_module,
     );
 
-    return Ok(());
+    Ok(())
 }
 
 #[no_mangle]
@@ -383,7 +383,8 @@ pub extern "C" fn fts5_create_lindera_tokenizer(
     unsafe {
         *fts5_tokenizer = Box::into_raw(tokenizer);
     }
-    return SQLITE_OK;
+    
+    SQLITE_OK
 }
 
 #[no_mangle]
