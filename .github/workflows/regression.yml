@@ -70,6 +70,8 @@ jobs:
         toolchain: [stable]
         features: ["ipadic", "ko-dic", "cc-cedict"]
     runs-on: ${{ matrix.platform.runner }}
+    env:
+      LINDERA_CONFIG_PATH: "./resources/lindera.json"
     steps:
       - name: Run checkout
         uses: actions/checkout@v4
