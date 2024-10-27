@@ -10,7 +10,6 @@ use std::io::BufReader;
 
 use dotenv::dotenv;
 use libc::{c_char, c_int, c_uchar, c_void};
-// use unicode_normalization::UnicodeNormalization;
 
 use lindera::tokenizer::{Tokenizer, TokenizerConfig};
 
@@ -69,17 +68,9 @@ fn lindera_fts5_tokenize_internal(
     // wouldn't accessible.
     let input = core::str::from_utf8(slice).map_err(|_| SQLITE_OK)?;
 
-    // let mut normalized = String::with_capacity(1024);
-
     match unsafe { (*tokenizer).tokenizer.tokenize(input) } {
         Ok(tokens) => {
             for token in tokens {
-                // normalize_into(token.text.as_ref(), &mut normalized);
-                // let a = normalized.as_bytes().as_ptr();
-                // let b =  token.text.as_bytes().as_ptr();
-                // let c = normalized.len();
-                // let d = token.text.len();
-
                 let rc = x_token(
                     p_ctx,
                     0,
@@ -101,35 +92,9 @@ fn lindera_fts5_tokenize_internal(
     Ok(())
 }
 
-// fn is_diacritic(x: char) -> bool {
-//     '\u{0300}' <= x && x <= '\u{036f}'
-// }
-
-// fn normalize_into(segment: &str, buf: &mut String) {
-//     buf.clear();
-
-//     for x in segment.nfd() {
-//         if is_diacritic(x) {
-//             continue;
-//         }
-//         if x.is_ascii() {
-//             buf.push(x.to_ascii_lowercase());
-//         } else {
-//             buf.extend(x.to_lowercase());
-//         }
-//     }
-// }
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    // #[test]
-    // fn it_normalizes_segment() {
-    //     let mut buf = String::new();
-    //     normalize_into("DïācRîtįcs", &mut buf);
-    //     assert_eq!(buf, "diacritics");
-    // }
 
     extern "C" fn token_callback(
         ctx: *mut c_void,
