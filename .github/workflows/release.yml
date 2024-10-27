@@ -1,0 +1,113 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    strategy:
+      matrix:
+        platform:
+          - runner: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            archive: .zip
+            extension: ".a"
+          - runner: macOS-latest
+            target: x86_64-apple-darwin
+            archive: .zip
+            extension: ".a"
+          - runner: macOS-latest
+            target: aarch64-apple-darwin
+            archive: .zip
+            extension: ".a"
+          - runner: windows-latest
+            target: x86_64-pc-windows-msvc
+            archive: .zip
+            extension: ".ilb"
+        toolchain: [stable]
+        features: ["ipadic", "ko-dic", "cc-cedict"]
+    runs-on: ${{ matrix.platform.runner }}
+    env:
+      LINDERA_CONFIG_PATH: "./resources/lindera.json"
+    steps:
+      - name: Run checkout
+        uses: actions/checkout@v4
+      
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          target: ${{ matrix.platform.target }}
+          components: rustfmt, clippy
+
+      - name: Add msbuild to PATH
+        if: matrix.platform.target == 'windows-latest'
+        uses: microsoft/setup-msbuild@v2
+      
+      - name: Compile
+        run: cargo build --release --features=${{ matrix.features }},extension --target=${{ matrix.platform.target }} --target-dir=target/${{ matrix.platform.target }}
+
+      - name: Create artifact for Linux
+        if: matrix.platform.runner == 'ubuntu-latest'
+        run: zip --junk-paths lindera-${{ matrix.features }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} target/${{ matrix.features }}/${{ matrix.platform.target }}/release/lindera${{ matrix.platform.extension }}
+
+      - name: Create artifact for Windows
+        if: matrix.platform.runner == 'windows-latest'
+        run: powershell Compress-Archive -DestinationPath lindera-${{ matrix.platform.target }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} -Path target/${{ matrix.features }}/${{ matrix.platform.target }}/release/lindera${{ matrix.platform.extension }}
+
+      - name: Create artifact for OSX
+        if: matrix.platform.runner == 'macos-latest'
+        run: zip --junk-paths lindera-${{ matrix.features }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} target/${{ matrix.features }}/${{ matrix.platform.target }}/release/lindera${{ matrix.platform.extension }}
+
+      - name: Upload artifact
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: lindera-${{ matrix.features }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }}
+          name: Release ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+
+  publish-crates:
+    name: Publish crate
+    needs: [build]
+    strategy:
+      matrix:
+        platform:
+          - runner: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+        toolchain: [stable]
+    runs-on: ${{ matrix.platform.runner }}
+    env:
+      LINDERA_CONFIG_PATH: "./resources/lindera.json"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          target: ${{ matrix.platform.target }}
+          components: rustfmt, clippy
+
+      - name: Publish lindera-sqlite
+        run: |
+          LINDERA_SQLITE_VERSION=$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[] | select(.name=="lindera-sqlite") | .version')
+          LINDERA_SQLITE_VERSIONS=$(curl -s -XGET https://crates.io/api/v1/crates/lindera-sqlite | jq -r 'select(.versions != null) | .versions[].num')
+          if echo ${LINDERA_SQLITE_VERSIONS} | grep ${LINDERA_SQLITE_VERSION} >/dev/null; then
+            echo "lindera-sqlite ${LINDERA_SQLITE_VERSION} has already published"
+          else
+            cargo publish --token ${{ secrets.CRATES_TOKEN }}
+          fi
