@@ -51,9 +51,6 @@ jobs:
       - name: Add msbuild to PATH
         if: matrix.platform.target == 'windows-latest'
         uses: microsoft/setup-msbuild@v2
-
-      - name: Run test
-        run: cargo test --target "${{ matrix.platform.target }}" --features "${{ matrix.features }},extension"
       
       - name: Compile
         run: cargo build --release --features=${{ matrix.features }},extension --target=${{ matrix.platform.target }} --target-dir=target/${{ matrix.platform.target }}

@@ -19,7 +19,7 @@ jobs:
           - runner: windows-latest
             target: x86_64-pc-windows-msvc
         toolchain: [stable, beta, nightly]
-        features: ["ipadic", "ko-dic", "cc-cedict"]
+        features: ["ipadic,ko-dic,cc-cedict"]
     runs-on: ${{ matrix.platform.runner }}
     env:
       LINDERA_CONFIG_PATH: "./resources/lindera.json"
