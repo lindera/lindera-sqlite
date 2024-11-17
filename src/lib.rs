@@ -4,32 +4,18 @@ mod common;
 #[cfg(feature = "extension")]
 mod extension;
 
-use std::env;
-use std::fs::File;
-use std::io::BufReader;
-
-use dotenv::dotenv;
 use libc::{c_char, c_int, c_uchar, c_void};
 
-use lindera::tokenizer::{Tokenizer, TokenizerConfig};
+use lindera::tokenizer::{Tokenizer, TokenizerBuilder};
 
 pub use crate::common::*;
 
 pub fn load_tokenizer() -> Result<Tokenizer, c_int> {
-    dotenv().ok();
-
-    let config_path =
-        env::var("LINDERA_CONFIG_PATH").unwrap_or_else(|_| "./lindera.json".to_string());
-    let config_file = File::open(config_path).map_err(|e| {
-        eprintln!("Failed to create tokenizer: {}", e);
+    let builder = TokenizerBuilder::new().map_err(|e| {
+        eprintln!("Failed to create tokenizer builder: {}", e);
         SQLITE_INTERNAL
     })?;
-    let config_reader = BufReader::new(config_file);
-    let config: TokenizerConfig = serde_json::from_reader(config_reader).map_err(|e| {
-        eprintln!("Failed to create tokenizer: {}", e);
-        SQLITE_INTERNAL
-    })?;
-    let tokenizer = Tokenizer::from_config(&config).map_err(|e| {
+    let tokenizer = builder.build().map_err(|e| {
         eprintln!("Failed to create tokenizer: {}", e);
         SQLITE_INTERNAL
     })?;

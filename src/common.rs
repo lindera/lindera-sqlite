@@ -1,14 +1,15 @@
 use libc::{c_char, c_int, c_void};
-use lindera::tokenizer::Tokenizer;
 
-pub struct Fts5Tokenizer {
-    pub tokenizer: Tokenizer,
-}
+use lindera::tokenizer::Tokenizer;
 
 // sqlite3.h
 pub const SQLITE_OK: c_int = 0;
 pub const SQLITE_INTERNAL: c_int = 2;
 pub const SQLITE_MISUSE: c_int = 21;
+
+pub struct Fts5Tokenizer {
+    pub tokenizer: Tokenizer,
+}
 
 pub type TokenFunction = extern "C" fn(
     p_ctx: *mut c_void,
