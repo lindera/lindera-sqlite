@@ -7,3 +7,4 @@ tag:
 publish:
 ifeq ($(shell curl -s -XGET https://crates.io/api/v1/crates/lindera-sqlite | jq -r '.versions[].num' | grep $(LINDERA_SQLITE_VERSION)),)
 	(cargo package && cargo publish)
+endif
