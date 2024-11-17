@@ -33,7 +33,7 @@ jobs:
             archive: .zip
             extension: ".dll"
         toolchain: [stable]
-        features: ["ipadic", "ko-dic", "cc-cedict"]
+        features: ["cjk"]
     runs-on: ${{ matrix.platform.runner }}
     env:
       LINDERA_CONFIG_PATH: "./resources/lindera.json"
