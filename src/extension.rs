@@ -5,10 +5,10 @@ use crate::common::*;
 use crate::lindera_fts5_tokenize;
 use crate::load_tokenizer;
 
+pub const FTS5_API_VERSION: c_int = 2;
+
 pub struct Sqlite3 {}
 struct Sqlite3Stmt {}
-
-pub const FTS5_API_VERSION: c_int = 2;
 
 // fts5.h
 #[repr(C)]

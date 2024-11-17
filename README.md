@@ -4,22 +4,44 @@ lindera-sqlite is a C ABI library which exposes a [FTS5](https://www.sqlite.org/
 
 When used as a custom FTS5 tokenizer this enables application to support Chinese, Japanese and Korean in full-text search.
 
-## Extension Build/Usage Example
+## Build extension
 
 ```sh
-cargo rustc --features extension -- --crate-type=cdylib
+% cargo build --features=ipadic,ko-dic,cc-cedict,compress,extension
 ```
 
-Load extension from `./target/release/liblindera_tokenizer.dylib`.
+## Set enviromment variable for Lindera configuration
+
+```sh
+% export LINDERA_CONFIG_PATH=./resources/lindera.yml
+```
+
+## Then start SQLite
+
+```sh
+% sqlite3 example.db
+```
+
+## Load extension
 
 ```sql
-CREATE VIRTUAL TABLE
-fts
-USING fts5(content, tokenize='lindera_tokenizer')
+sqlite> .load ./target/debug/liblindera_sqlite lindera_fts5_tokenizer_init
 ```
 
-## Generating headers
+## Create table using FTS5 with Lindera tokenizer
 
-```sh
-cbindgen --profile release . -o target/release/fts5-tokenizer.h
+```sql
+sqlite> CREATE VIRTUAL TABLE example USING fts5(content, tokenize='lindera_tokenizer');
+```
+
+## Insert data
+
+```sql
+sqlite> INSERT INTO example(content) VALUES ("Ｌｉｎｄｅｒａは形態素解析ｴﾝｼﾞﾝです。ユーザー辞書も利用可能です。");
+```
+
+## Search data
+
+```sql
+sqlite> SELECT * FROM example WHERE content MATCH "Lindera" ORDER BY bm25(example) LIMIT 10;
 ```
