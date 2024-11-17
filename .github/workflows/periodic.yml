@@ -19,7 +19,7 @@ jobs:
           - runner: windows-latest
             target: x86_64-pc-windows-msvc
         toolchain: [stable, beta, nightly]
-        features: ["ipadic,ko-dic,cc-cedict"]
+        features: ["cjk"]
     runs-on: ${{ matrix.platform.runner }}
     env:
       LINDERA_CONFIG_PATH: "./resources/lindera.yml"
@@ -35,4 +35,4 @@ jobs:
           components: rustfmt, clippy
 
       - name: Run test
-        run: cargo test --target "${{ matrix.platform.target }}" --features "${{ matrix.features }}"
+        run: cargo test --target "${{ matrix.platform.target }}" --features "${{ matrix.features }},extension"

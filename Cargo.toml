@@ -20,9 +20,9 @@ ko-dic = ["lindera/ko-dic"]  # Include ko-dic dictionary (Korean)
 cc-cedict = ["lindera/cc-cedict"]  # Include CC-CEDICT dictionary (Chinese)
 compress = ["lindera/compress"]  # Compress dictionaries
 extension = []
+cjk = ["cc-cedict", "ipadic", "ko-dic", "compress", "extension"]  # Include CJK dictionary (Chinese, Japanese, Korean)
 
 [lib]
-# crate-type = ["rlib", "staticlib"]
 crate-type = ["cdylib"]
 
 [profile.release]
@@ -41,5 +41,5 @@ lindera = "0.38.0"
 criterion = "0.5"
 
 [[bench]]
-name = "tokenizer"
+name = "bench"
 harness = false
