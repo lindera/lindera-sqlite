@@ -37,6 +37,8 @@ jobs:
     runs-on: ${{ matrix.platform.runner }}
     env:
       LINDERA_CONFIG_PATH: "./resources/lindera.json"
+    permissions:
+      contents: write
     steps:
       - name: Run checkout
         uses: actions/checkout@v4
