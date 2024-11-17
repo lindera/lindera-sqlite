@@ -57,15 +57,15 @@ jobs:
 
       - name: Create artifact for Linux
         if: matrix.platform.runner == 'ubuntu-latest'
-        run: zip --junk-paths lindera-${{ matrix.features }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} target/${{ matrix.features }}/${{ matrix.platform.target }}/release/lindera${{ matrix.platform.extension }}
+        run: zip --junk-paths lindera-${{ matrix.features }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} target/${{ matrix.features }}/${{ matrix.platform.target }}/release/liblindera_sqlite${{ matrix.platform.extension }}
 
       - name: Create artifact for Windows
         if: matrix.platform.runner == 'windows-latest'
-        run: powershell Compress-Archive -DestinationPath lindera-${{ matrix.platform.target }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} -Path target/${{ matrix.features }}/${{ matrix.platform.target }}/release/lindera${{ matrix.platform.extension }}
+        run: powershell Compress-Archive -DestinationPath lindera-${{ matrix.platform.target }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} -Path target/${{ matrix.features }}/${{ matrix.platform.target }}/release/liblindera_sqlite${{ matrix.platform.extension }}
 
       - name: Create artifact for OSX
         if: matrix.platform.runner == 'macos-latest'
-        run: zip --junk-paths lindera-${{ matrix.features }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} target/${{ matrix.features }}/${{ matrix.platform.target }}/release/lindera${{ matrix.platform.extension }}
+        run: zip --junk-paths lindera-${{ matrix.features }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} target/${{ matrix.features }}/${{ matrix.platform.target }}/release/liblindera_sqlite${{ matrix.platform.extension }}
 
       - name: Upload artifact
         uses: softprops/action-gh-release@v2
