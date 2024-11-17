@@ -35,4 +35,4 @@ jobs:
           components: rustfmt, clippy
 
       - name: Run test
-        run: cargo test --target "${{ matrix.platform.target }}" --features "${{ matrix.features }},extension"
+        run: cargo test --target "${{ matrix.platform.target }}" --features "${{ matrix.features }}"

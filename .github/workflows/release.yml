@@ -53,7 +53,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
       
       - name: Compile
-        run: cargo build --release --features=${{ matrix.features }},extension --target=${{ matrix.platform.target }} --target-dir=target/${{ matrix.platform.target }}
+        run: cargo build --release --features=${{ matrix.features }} --target=${{ matrix.platform.target }} --target-dir=target/${{ matrix.features }}
 
       - name: Create artifact for Linux
         if: matrix.platform.runner == 'ubuntu-latest'

@@ -53,7 +53,7 @@ jobs:
           components: rustfmt, clippy
 
       - name: Run check
-        run: cargo check --features "${{ matrix.features }},extension"
+        run: cargo check --features "${{ matrix.features }}"
 
   test:
     strategy:
