@@ -10,6 +10,7 @@ use lindera::tokenizer::{Tokenizer, TokenizerBuilder};
 
 pub use crate::common::*;
 
+
 pub fn load_tokenizer() -> Result<Tokenizer, c_int> {
     let builder = TokenizerBuilder::new().map_err(|e| {
         eprintln!("Failed to create tokenizer builder: {}", e);
