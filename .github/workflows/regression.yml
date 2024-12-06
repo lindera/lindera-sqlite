@@ -17,7 +17,7 @@ jobs:
           - runner: ubuntu-latest
             target: x86_64
         toolchain: [stable]
-        features: ["ipadic", "ko-dic", "cc-cedict"]
+        features: ["cjk"]
     runs-on: ${{ matrix.platform.runner }}
     steps:
       - name: Run checkout
@@ -68,7 +68,7 @@ jobs:
           - runner: windows-latest
             target: x86_64-pc-windows-msvc
         toolchain: [stable]
-        features: ["ipadic,ko-dic,cc-cedict"]
+        features: ["cjk"]
     runs-on: ${{ matrix.platform.runner }}
     env:
       LINDERA_CONFIG_PATH: "./resources/lindera.yml"
