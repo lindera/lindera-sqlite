@@ -318,7 +318,13 @@ fn lindera_fts_tokenizer_internal_init(
     }
 
     let mut stmt = null_mut::<Sqlite3Stmt>();
-    let rc = (api.prepare)(db, "SELECT fts5(?1)\0".as_ptr(), -1, &mut stmt, null_mut());
+    let rc = (api.prepare)(
+        db,
+        c"SELECT fts5(?1)".as_ptr() as *const u8,
+        -1,
+        &mut stmt,
+        null_mut(),
+    );
 
     if rc != SQLITE_OK {
         return Err(rc);
@@ -329,7 +335,7 @@ fn lindera_fts_tokenizer_internal_init(
         stmt,
         1,
         &mut p_fts5_api,
-        b"fts5_api_ptr\0".as_ptr(),
+        c"fts5_api_ptr".as_ptr() as *const u8,
         null_mut(),
     );
     if rc != SQLITE_OK {
@@ -360,7 +366,7 @@ fn lindera_fts_tokenizer_internal_init(
 
     (fts5_api.x_create_tokenizer)(
         fts5_api,
-        b"lindera_tokenizer\0".as_ptr(),
+        c"lindera_tokenizer".as_ptr() as *const u8,
         null_mut(),
         &mut tokenizer,
         fts5_destroy_icu_module,
