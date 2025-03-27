@@ -318,7 +318,13 @@ fn lindera_fts_tokenizer_internal_init(
     }
 
     let mut stmt = null_mut::<Sqlite3Stmt>();
-    let rc = (api.prepare)(db, c"SELECT fts5(?1)".as_ptr() as *const u8, -1, &mut stmt, null_mut());
+    let rc = (api.prepare)(
+        db,
+        c"SELECT fts5(?1)".as_ptr() as *const u8,
+        -1,
+        &mut stmt,
+        null_mut(),
+    );
 
     if rc != SQLITE_OK {
         return Err(rc);
