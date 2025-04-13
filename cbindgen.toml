@@ -1,6 +1,6 @@
 language = "C"
 
-header = "/*\nCopyright (C) 2024 Lindera.\nSPDX-License-Identifier: AGPL-3.0-only\n*/\n"
+header = "/*\nCopyright (C) 2025 Lindera.\nSPDX-License-Identifier: AGPL-3.0-only\n*/\n"
 
 include_guard = "LINDERA_FTS5_TOKENIZER_H_"
 
