@@ -1,6 +1,6 @@
 [package]
 name = "lindera-sqlite"
-version = "0.41.0"
+version = "0.42.2"
 edition = "2021"
 description = "Lindera tokenizer for SQLite FTS5 extention"
 documentation = "https://docs.rs/lindera-sqlite"
@@ -12,15 +12,23 @@ categories = ["text-processing"]
 license = "AGPL-3.0-only"
 
 [features]
-default = []  # No directories included
-ipadic = ["lindera/ipadic"]  # Include IPADIC dictionary (Japanese)
-ipadic-neologd = ["lindera/ipadic-neologd"]  # Include IPADIC NEologd dictionary (Japanese)
-unidic = ["lindera/unidic"]  # Include UniDic dictionary (Japanese)
-ko-dic = ["lindera/ko-dic"]  # Include ko-dic dictionary (Korean)
-cc-cedict = ["lindera/cc-cedict"]  # Include CC-CEDICT dictionary (Chinese)
-compress = ["lindera/compress"]  # Compress dictionaries
+default = [] # No directories included
+ipadic = ["lindera/ipadic"] # Include IPADIC dictionary (Japanese)
+ipadic-neologd = [
+    "lindera/ipadic-neologd",
+] # Include IPADIC NEologd dictionary (Japanese)
+unidic = ["lindera/unidic"] # Include UniDic dictionary (Japanese)
+ko-dic = ["lindera/ko-dic"] # Include ko-dic dictionary (Korean)
+cc-cedict = ["lindera/cc-cedict"] # Include CC-CEDICT dictionary (Chinese)
+compress = ["lindera/compress"] # Compress dictionaries
 extension = []
-cjk = ["cc-cedict", "ipadic", "ko-dic", "compress", "extension"]  # Include CJK dictionary (Chinese, Japanese, Korean)
+cjk = [
+    "cc-cedict",
+    "ipadic",
+    "ko-dic",
+    "compress",
+    "extension",
+] # Include CJK dictionary (Chinese, Japanese, Korean)
 
 [lib]
 name = "lindera_sqlite"
@@ -32,15 +40,15 @@ lto = true
 
 [dependencies]
 # libc without `std`
-libc = { version = "0.2.171", "default-features" = false, features = [] }
+libc = { version = "0.2.172", "default-features" = false, features = [] }
 serde_json = "1.0.140"
 unicode-segmentation = "1.12.0"
 unicode-normalization = "0.1.22"
 
-lindera = "0.41.0"
+lindera = "0.42.2"
 
 [dev-dependencies]
-criterion = "0.5"
+criterion = "0.5.1"
 
 [[bench]]
 name = "bench"
