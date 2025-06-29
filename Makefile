@@ -1,5 +1,9 @@
 LINDERA_SQLITE_VERSION ?= $(shell cargo metadata --no-deps --format-version=1 | jq -r '.packages[] | select(.name=="lindera-sqlite") | .version')
 
+USER_AGENT ?= $(shell curl --version | head -n1 | awk '{print $1"/"$2}')
+USER ?= $(shell whoami)
+HOSTNAME ?= $(shell hostname)
+
 .DEFAULT_GOAL := help
 
 clean: ## Clean the project
@@ -25,7 +29,7 @@ tag: ## Make a new tag for the current version
 	git push origin v$(LINDERA_SQLITE_VERSION)
 
 publish: ## Publish the crate to crates.io
-ifeq ($(shell curl -s -XGET https://crates.io/api/v1/crates/lindera-sqlite | jq -r '.versions[].num' | grep $(LINDERA_SQLITE_VERSION)),)
+ifeq ($(shell curl -s -XGET -H "User-Agent: $(USER_AGENT) ($(USER)@$(HOSTNAME))" https://crates.io/api/v1/crates/lindera-sqlite | jq -r '.versions[].num' | grep $(LINDERA_SQLITE_VERSION)),)
 	(cargo package && cargo publish)
 endif
 
