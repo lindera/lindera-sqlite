@@ -17,9 +17,8 @@ jobs:
       matrix:
         platform:
           - runner: ubuntu-latest
-            target: x86_64
+            target: x86_64-unknown-linux-gnu
         toolchain: [stable]
-        features: ["cjk"]
     runs-on: ${{ matrix.platform.runner }}
     steps:
       - name: Run checkout
@@ -29,6 +28,7 @@ jobs:
         uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
+          target: ${{ matrix.platform.target }}
           components: rustfmt, clippy
 
       - name: Check format
@@ -65,7 +65,7 @@ jobs:
           components: rustfmt, clippy
 
       - name: Run test
-        run: cargo test --target "${{ matrix.platform.target }}" --features "${{ matrix.features }}"
+        run: cargo test --target "${{ matrix.platform.target }}" --all-features
 
   build:
     name: Build
@@ -90,7 +90,22 @@ jobs:
             archive: .zip
             extension: ".dll"
         toolchain: [stable]
-        features: ["cjk"]
+        features:
+          - value: "ipadic"
+            package_name: "lindera-sqlite-ipadic"
+            package_description: "Python binding for Lindera with Japanese dictionary (IPADIC)"
+          - value: "unidic"
+            package_name: "lindera-sqlite-unidic"
+            package_description: "Python binding for Lindera with Japanese dictionary (Unidic)"
+          - value: "ko-dic"
+            package_name: "lindera-sqlite-ko-dic"
+            package_description: "Python binding for Lindera with Korean dictionary (ko-dic)"
+          - value: "cc-cedict"
+            package_name: "lindera-sqlite-cc-cedict"
+            package_description: "Python binding for Lindera with CHinese dictionary (CC-CEDICT)"
+          - value: "cjk"
+            package_name: "lindera-sqlite"
+            package_description: "Python binding for Lindera with CJK dictionaries (IPADIC, ko-dic, CC-CEDICT)"
     runs-on: ${{ matrix.platform.runner }}
     env:
       LINDERA_CONFIG_PATH: "./resources/lindera.json"
@@ -99,7 +114,7 @@ jobs:
     steps:
       - name: Run checkout
         uses: actions/checkout@v4
-      
+
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@v1
         with:
@@ -110,28 +125,28 @@ jobs:
       - name: Add msbuild to PATH
         if: matrix.platform.target == 'windows-latest'
         uses: microsoft/setup-msbuild@v2
-      
+
       - name: Compile
-        run: cargo build --release --features=${{ matrix.features }} --target=${{ matrix.platform.target }} --target-dir=target/${{ matrix.features }}
+        run: cargo build --release --features=${{ matrix.features.value }} --target=${{ matrix.platform.target }} --target-dir=target/${{ matrix.features.value }}
 
       - name: Create artifact for Linux
         if: matrix.platform.runner == 'ubuntu-latest'
-        run: zip --junk-paths lindera-${{ matrix.features }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} target/${{ matrix.features }}/${{ matrix.platform.target }}/release/liblindera_sqlite${{ matrix.platform.extension }}
+        run: zip --junk-paths ${{ matrix.features.package_name }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} target/${{ matrix.features.value }}/${{ matrix.platform.target }}/release/${{ matrix.features.package_name }}${{ matrix.platform.extension }}
 
       - name: Create artifact for Windows
         if: matrix.platform.runner == 'windows-latest'
-        run: powershell Compress-Archive -DestinationPath lindera-${{ matrix.features }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} -Path target/${{ matrix.features }}/${{ matrix.platform.target }}/release/lindera_sqlite${{ matrix.platform.extension }}
+        run: powershell Compress-Archive -DestinationPath ${{ matrix.features.package_name }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} -Path target/${{ matrix.features.value }}/${{ matrix.platform.target }}/release/${{ matrix.features.package_name }}${{ matrix.platform.extension }}
 
       - name: Create artifact for OSX
         if: matrix.platform.runner == 'macos-latest'
-        run: zip --junk-paths lindera-${{ matrix.features }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} target/${{ matrix.features }}/${{ matrix.platform.target }}/release/liblindera_sqlite${{ matrix.platform.extension }}
+        run: zip --junk-paths ${{ matrix.features.package_name }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} target/${{ matrix.features.value }}/${{ matrix.platform.target }}/release/${{ matrix.features.package_name }}${{ matrix.platform.extension }}
 
       - name: Upload artifact
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: lindera-${{ matrix.features }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }}
+          files: ${{ matrix.features.package_name }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }}
           name: Release ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
           draft: false
@@ -168,5 +183,7 @@ jobs:
           if echo ${LINDERA_SQLITE_VERSIONS} | grep ${LINDERA_SQLITE_VERSION} >/dev/null; then
             echo "lindera-sqlite ${LINDERA_SQLITE_VERSION} has already published"
           else
-            cargo publish --token ${{ secrets.CRATES_TOKEN }}
+            cargo publish
           fi
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_TOKEN }}
