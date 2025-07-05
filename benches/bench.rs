@@ -1,8 +1,8 @@
 use core::ptr::null_mut;
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use libc::{c_char, c_int, c_void};
 
-use lindera_sqlite::{lindera_fts5_tokenize, load_tokenizer, Fts5Tokenizer, SQLITE_OK};
+use lindera_sqlite::{Fts5Tokenizer, SQLITE_OK, lindera_fts5_tokenize, load_tokenizer};
 
 extern "C" fn noop_callback(
     _ctx: *mut c_void,

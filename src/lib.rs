@@ -12,18 +12,18 @@ pub use crate::common::*;
 
 pub fn load_tokenizer() -> Result<Tokenizer, c_int> {
     let builder = TokenizerBuilder::new().map_err(|e| {
-        eprintln!("Failed to create tokenizer builder: {}", e);
+        eprintln!("Failed to create tokenizer builder: {e}");
         SQLITE_INTERNAL
     })?;
     let tokenizer = builder.build().map_err(|e| {
-        eprintln!("Failed to create tokenizer: {}", e);
+        eprintln!("Failed to create tokenizer: {e}");
         SQLITE_INTERNAL
     })?;
 
     Ok(tokenizer)
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn lindera_fts5_tokenize(
     tokenizer: *mut Fts5Tokenizer,
     p_ctx: *mut c_void,
