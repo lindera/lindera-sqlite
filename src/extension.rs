@@ -294,7 +294,7 @@ pub struct Sqlite3APIRoutines {
     ) -> c_int,
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn lindera_fts5_tokenizer_init(
     db: *mut Sqlite3,
     _pz_err_msg: *mut *mut c_uchar,
@@ -375,7 +375,7 @@ fn lindera_fts_tokenizer_internal_init(
     Ok(())
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn fts5_create_lindera_tokenizer(
     _p_context: *mut c_void,
     _az_arg: *const *const c_uchar,
@@ -393,13 +393,13 @@ pub extern "C" fn fts5_create_lindera_tokenizer(
     SQLITE_OK
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn fts5_delete_lindera_tokenizer(fts5_tokenizer: *mut Fts5Tokenizer) {
     let tokenizer = unsafe { Box::from_raw(fts5_tokenizer) };
     drop(tokenizer);
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn fts5_destroy_icu_module(_module: *mut c_void) {
     // no-op
 }
