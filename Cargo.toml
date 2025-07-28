@@ -23,10 +23,9 @@ cjk = [
     "cc-cedict",
     "ipadic",
     "ko-dic",
-    "extension",
 ] # Include CJK dictionary (Chinese, Japanese, Korean)
 extension = []
-default = [] # No directories included
+default = ["extension"] # No directories included
 
 [lib]
 name = "lindera_sqlite"
