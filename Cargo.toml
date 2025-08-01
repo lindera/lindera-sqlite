@@ -1,6 +1,6 @@
 [package]
 name = "lindera-sqlite"
-version = "0.44.1"
+version = "0.45.0"
 edition = "2024"
 description = "Lindera tokenizer for SQLite FTS5 extention"
 documentation = "https://docs.rs/lindera-sqlite"
@@ -38,14 +38,14 @@ lto = true
 [dependencies]
 # libc without `std`
 libc = { version = "0.2.174", "default-features" = false, features = [] }
-serde_json = "1.0.140"
+serde_json = "1.0.142"
 unicode-segmentation = "1.12.0"
 unicode-normalization = "0.1.24"
 
-lindera = "0.44.1"
+lindera = "0.45.0"
 
 [dev-dependencies]
-criterion = "0.6.0"
+criterion = "0.7.0"
 
 [[bench]]
 name = "bench"
