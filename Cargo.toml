@@ -40,6 +40,9 @@ crate-type = ["cdylib", "rlib"]
 
 [profile.release]
 lto = true
+codegen-units = 1     # Single codegen unit for better optimization
+opt-level = 3         # Maximum optimization level
+panic = "abort"       # Abort on panic for smaller binary and faster code
 
 [dependencies]
 # libc without `std`

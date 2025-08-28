@@ -16,6 +16,7 @@ extern "C" fn noop_callback(
     return SQLITE_OK;
 }
 
+#[inline(always)]
 fn tokenize(tokenizer: &mut Fts5Tokenizer, input: &str) {
     lindera_fts5_tokenize(
         tokenizer,

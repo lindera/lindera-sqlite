@@ -10,6 +10,7 @@ use lindera::tokenizer::{Tokenizer, TokenizerBuilder};
 
 pub use crate::common::*;
 
+#[inline]
 pub fn load_tokenizer() -> Result<Tokenizer, c_int> {
     let builder = TokenizerBuilder::new().map_err(|e| {
         eprintln!("Failed to create tokenizer builder: {e}");
@@ -41,6 +42,7 @@ pub extern "C" fn lindera_fts5_tokenize(
     .unwrap_or(SQLITE_INTERNAL)
 }
 
+#[inline]
 fn lindera_fts5_tokenize_internal(
     tokenizer: *mut Fts5Tokenizer,
     p_ctx: *mut c_void,
@@ -48,6 +50,10 @@ fn lindera_fts5_tokenize_internal(
     n_text: c_int,
     x_token: TokenFunction,
 ) -> Result<(), c_int> {
+    if n_text <= 0 {
+        return Ok(());
+    }
+
     let slice = unsafe { core::slice::from_raw_parts(p_text as *const c_uchar, n_text as usize) };
 
     // Map errors to SQLITE_OK because failing here means that the database
