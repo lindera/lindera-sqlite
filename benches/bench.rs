@@ -1,6 +1,7 @@
 use core::ptr::null_mut;
-use criterion::{Criterion, black_box, criterion_group, criterion_main};
+use criterion::{Criterion, criterion_group, criterion_main};
 use libc::{c_char, c_int, c_void};
+use std::hint::black_box;
 
 use lindera_sqlite::{Fts5Tokenizer, SQLITE_OK, lindera_fts5_tokenize, load_tokenizer};
 
