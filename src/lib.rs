@@ -53,7 +53,7 @@ fn lindera_fts5_tokenize_internal(
     if n_text <= 0 {
         return Ok(());
     }
-    
+
     let slice = unsafe { core::slice::from_raw_parts(p_text as *const c_uchar, n_text as usize) };
 
     // Map errors to SQLITE_OK because failing here means that the database
