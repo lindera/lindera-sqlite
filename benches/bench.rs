@@ -32,7 +32,7 @@ fn fts5_benchmark(c: &mut Criterion) {
     let mut tokenizer = Fts5Tokenizer {
         tokenizer: load_tokenizer().expect("Failed to load tokenizer"),
     };
-    
+
     let latin_lower_60kb = "hello ".repeat(10 * 1024);
     let latin_upper_60kb = "HELLO ".repeat(10 * 1024);
     let diacritics_60kb = "öplö ".repeat(10 * 1024);
