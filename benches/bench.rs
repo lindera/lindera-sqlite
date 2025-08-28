@@ -16,11 +16,9 @@ extern "C" fn noop_callback(
     return SQLITE_OK;
 }
 
-fn tokenize(input: &str) {
+fn tokenize(tokenizer: &mut Fts5Tokenizer, input: &str) {
     lindera_fts5_tokenize(
-        &mut Fts5Tokenizer {
-            tokenizer: load_tokenizer().expect("Failed to load tokenizer"),
-        },
+        tokenizer,
         null_mut(),
         0,
         input.as_bytes().as_ptr() as *const c_char,
@@ -30,25 +28,30 @@ fn tokenize(input: &str) {
 }
 
 fn fts5_benchmark(c: &mut Criterion) {
+    // Initialize tokenizer once before benchmarking
+    let mut tokenizer = Fts5Tokenizer {
+        tokenizer: load_tokenizer().expect("Failed to load tokenizer"),
+    };
+    
     let latin_lower_60kb = "hello ".repeat(10 * 1024);
     let latin_upper_60kb = "HELLO ".repeat(10 * 1024);
     let diacritics_60kb = "öplö ".repeat(10 * 1024);
     let cjk_60kb = "你好".repeat(10 * 1024);
 
     c.bench_function("tokenize latin lowercase 60kb", |b| {
-        return b.iter(|| tokenize(black_box(&latin_lower_60kb)));
+        return b.iter(|| tokenize(&mut tokenizer, black_box(&latin_lower_60kb)));
     });
 
     c.bench_function("tokenize latin uppercase 60kb", |b| {
-        return b.iter(|| tokenize(black_box(&latin_upper_60kb)));
+        return b.iter(|| tokenize(&mut tokenizer, black_box(&latin_upper_60kb)));
     });
 
     c.bench_function("tokenize diacritics 60kb", |b| {
-        return b.iter(|| tokenize(black_box(&diacritics_60kb)));
+        return b.iter(|| tokenize(&mut tokenizer, black_box(&diacritics_60kb)));
     });
 
     c.bench_function("tokenize cjk 60kb", |b| {
-        return b.iter(|| tokenize(black_box(&cjk_60kb)));
+        return b.iter(|| tokenize(&mut tokenizer, black_box(&cjk_60kb)));
     });
 }
 
