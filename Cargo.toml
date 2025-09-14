@@ -1,6 +1,6 @@
 [package]
 name = "lindera-sqlite"
-version = "1.0.1"
+version = "1.0.2"
 edition = "2024"
 description = "Lindera tokenizer for SQLite FTS5 extention"
 documentation = "https://docs.rs/lindera-sqlite"
@@ -47,11 +47,11 @@ panic = "abort"   # Abort on panic for smaller binary and faster code
 [dependencies]
 # libc without `std`
 libc = { version = "0.2.175", "default-features" = false, features = [] }
-serde_json = "1.0.143"
+serde_json = "1.0.144"
 unicode-segmentation = "1.12.0"
 unicode-normalization = "0.1.24"
 
-lindera = "1.1.1"
+lindera = "1.2.0"
 
 [dev-dependencies]
 criterion = "0.7.0"

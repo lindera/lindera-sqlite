@@ -66,8 +66,8 @@ fn lindera_fts5_tokenize_internal(
                 let rc = x_token(
                     p_ctx,
                     0,
-                    token.text.as_bytes().as_ptr() as *const c_char,
-                    token.text.len() as c_int,
+                    token.surface.as_bytes().as_ptr() as *const c_char,
+                    token.surface.len() as c_int,
                     token.byte_start as c_int,
                     token.byte_end as c_int,
                 );
