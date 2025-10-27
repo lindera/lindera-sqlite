@@ -4,6 +4,7 @@ segmenter:
   # user_dictionary:
   #   path: "./resources/ipadic_simple.csv"
   #   kind: "ipadic"
+  keep_whitespace: false
 
 character_filters:
   - kind: "unicode_normalize"

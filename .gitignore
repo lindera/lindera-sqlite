@@ -9,3 +9,6 @@ target
 Cargo.lock
 
 *.db
+
+.serena/
+.mcp.json
