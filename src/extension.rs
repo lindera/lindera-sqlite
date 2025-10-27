@@ -1,3 +1,24 @@
+//! SQLite FTS5 extension integration.
+//!
+//! This module provides the C ABI implementation for integrating Lindera tokenizer
+//! as a SQLite FTS5 extension. It handles the low-level communication between SQLite's
+//! extension system and the Lindera tokenizer.
+//!
+//! # Architecture
+//!
+//! The extension follows SQLite's FTS5 tokenizer API specification:
+//!
+//! 1. **Initialization** ([`lindera_fts5_tokenizer_init`]): Entry point when loading the extension
+//! 2. **Tokenizer Creation** ([`fts5_create_lindera_tokenizer`]): Creates a new tokenizer instance
+//! 3. **Tokenization** (in `lib.rs`): Processes text and produces tokens
+//! 4. **Cleanup** ([`fts5_delete_lindera_tokenizer`], [`fts5_destroy_icu_module`]): Resource deallocation
+//!
+//! # Safety
+//!
+//! This module contains extensive unsafe code to interface with SQLite's C API.
+//! All public functions follow FFI safety conventions and use panic catching to
+//! prevent unwinding across the FFI boundary.
+
 use core::ptr::null_mut;
 use libc::{c_char, c_int, c_uchar, c_void};
 
@@ -5,11 +26,33 @@ use crate::common::*;
 use crate::lindera_fts5_tokenize;
 use crate::load_tokenizer;
 
+/// FTS5 API version supported by this extension.
+///
+/// This constant indicates compatibility with SQLite FTS5 API version 2.
+/// The extension will verify this version matches at runtime during initialization.
 pub const FTS5_API_VERSION: c_int = 2;
 
+/// Opaque SQLite database handle.
+///
+/// This represents a SQLite database connection used in FFI calls.
+/// It's an opaque type - the actual structure is defined in SQLite's C code.
 pub struct Sqlite3 {}
+
+/// Opaque SQLite prepared statement handle.
+///
+/// Represents a compiled SQL statement. Used internally for querying the FTS5 API pointer.
 struct Sqlite3Stmt {}
 
+/// FTS5 tokenizer API structure.
+///
+/// Defines the function pointers that implement a custom FTS5 tokenizer.
+/// This matches the structure defined in SQLite's `fts5.h` header file.
+///
+/// # Fields
+///
+/// - `x_create` - Creates a new tokenizer instance
+/// - `x_delete` - Deletes a tokenizer instance
+/// - `x_tokenize` - Tokenizes input text
 // fts5.h
 #[repr(C)]
 struct Fts5TokenizerApi {
@@ -30,6 +73,15 @@ struct Fts5TokenizerApi {
     ) -> c_int,
 }
 
+/// FTS5 API structure.
+///
+/// Provides access to FTS5 functionality, primarily for registering custom tokenizers.
+/// This structure is obtained from SQLite at runtime via a special query.
+///
+/// # Fields
+///
+/// - `i_version` - API version number (must be 2)
+/// - `x_create_tokenizer` - Function to register a new tokenizer with FTS5
 #[repr(C)]
 struct FTS5API {
     i_version: c_int, // Currently always set to 2
@@ -44,6 +96,20 @@ struct FTS5API {
     ) -> c_int,
 }
 
+/// SQLite extension API function table.
+///
+/// This massive structure contains function pointers to all SQLite C API functions
+/// available to extensions. It's defined in `sqlite3ext.h` and provided by SQLite
+/// when the extension is loaded.
+///
+/// Only a subset of these functions are actually used by this extension:
+/// - `prepare` - Compiles SQL statements
+/// - `step` - Executes prepared statements
+/// - `finalize` - Frees prepared statements
+/// - `bind_pointer` - Binds pointer values (used to retrieve FTS5 API)
+/// - `libversion_number` - Gets SQLite version number
+///
+/// Most fields are prefixed with `_` as they're unused but required for struct layout.
 // sqlite3ext.h
 #[repr(C)]
 pub struct Sqlite3APIRoutines {
@@ -294,6 +360,42 @@ pub struct Sqlite3APIRoutines {
     ) -> c_int,
 }
 
+/// Extension initialization entry point.
+///
+/// This is the main entry point called by SQLite when loading the extension via
+/// `.load` command or `sqlite3_load_extension()`. It registers the Lindera tokenizer
+/// with the FTS5 subsystem.
+///
+/// # Parameters
+///
+/// - `db` - SQLite database handle
+/// - `_pz_err_msg` - Pointer to error message string (unused)
+/// - `p_api` - Pointer to [`Sqlite3APIRoutines`] function table
+///
+/// # Returns
+///
+/// - [`SQLITE_OK`] - Extension loaded successfully
+/// - [`SQLITE_INTERNAL`] - Internal error or panic occurred
+/// - [`SQLITE_MISUSE`] - SQLite version too old or API version mismatch
+///
+/// # Safety
+///
+/// This function is marked `unsafe(no_mangle)` and `extern "C"` for FFI compatibility.
+/// It catches panics to prevent unwinding across the FFI boundary.
+///
+/// # C API Usage
+///
+/// ```c
+/// // In SQLite
+/// .load ./liblindera_sqlite lindera_fts5_tokenizer_init
+/// ```
+///
+/// Or programmatically:
+///
+/// ```c
+/// sqlite3_load_extension(db, "./liblindera_sqlite.so",
+///                       "lindera_fts5_tokenizer_init", &err);
+/// ```
 #[unsafe(no_mangle)]
 pub extern "C" fn lindera_fts5_tokenizer_init(
     db: *mut Sqlite3,
@@ -307,6 +409,30 @@ pub extern "C" fn lindera_fts5_tokenizer_init(
     .unwrap_or(SQLITE_INTERNAL)
 }
 
+/// Internal initialization implementation.
+///
+/// Performs the actual initialization steps:
+/// 1. Validates SQLite version (requires >= 3.20.0)
+/// 2. Retrieves FTS5 API pointer via SQL query
+/// 3. Validates FTS5 API version
+/// 4. Registers the Lindera tokenizer with FTS5
+///
+/// # Parameters
+///
+/// - `db` - SQLite database handle
+/// - `p_api` - Pointer to SQLite API function table
+///
+/// # Returns
+///
+/// - `Ok(())` - Initialization successful
+/// - `Err(SQLITE_INTERNAL)` - Null pointer or internal error
+/// - `Err(SQLITE_MISUSE)` - Version mismatch
+/// - `Err(code)` - SQLite error code from API calls
+///
+/// # Implementation Details
+///
+/// Uses a special SQLite query `SELECT fts5(?1)` with a bound pointer to retrieve
+/// the FTS5 API structure. This is the standard method for extensions to access FTS5.
 fn lindera_fts_tokenizer_internal_init(
     db: *mut Sqlite3,
     p_api: *const c_void,
@@ -375,6 +501,32 @@ fn lindera_fts_tokenizer_internal_init(
     Ok(())
 }
 
+/// Creates a new Lindera tokenizer instance.
+///
+/// Called by SQLite FTS5 when creating a table with `tokenize='lindera_tokenizer'`.
+/// Allocates and initializes a new [`Fts5Tokenizer`] instance.
+///
+/// # Parameters
+///
+/// - `_p_context` - Context pointer (unused)
+/// - `_az_arg` - Tokenizer arguments array (unused - configuration comes from environment)
+/// - `_n_arg` - Number of arguments (unused)
+/// - `fts5_tokenizer` - Output pointer to receive the new tokenizer instance
+///
+/// # Returns
+///
+/// - [`SQLITE_OK`] - Tokenizer created successfully
+/// - [`SQLITE_INTERNAL`] - Failed to load tokenizer (e.g., missing configuration)
+///
+/// # Memory Management
+///
+/// The tokenizer is allocated on the heap using `Box` and converted to a raw pointer.
+/// It will be freed later by [`fts5_delete_lindera_tokenizer`].
+///
+/// # Safety
+///
+/// Writes to the raw pointer `fts5_tokenizer`. The caller (SQLite) must ensure
+/// the pointer is valid and properly aligned.
 #[unsafe(no_mangle)]
 pub extern "C" fn fts5_create_lindera_tokenizer(
     _p_context: *mut c_void,
@@ -393,12 +545,41 @@ pub extern "C" fn fts5_create_lindera_tokenizer(
     SQLITE_OK
 }
 
+/// Deletes a Lindera tokenizer instance.
+///
+/// Called by SQLite FTS5 when dropping a table or closing the database.
+/// Properly deallocates the tokenizer instance created by [`fts5_create_lindera_tokenizer`].
+///
+/// # Parameters
+///
+/// - `fts5_tokenizer` - Pointer to the tokenizer instance to delete
+///
+/// # Safety
+///
+/// This function reconstructs a `Box` from the raw pointer and drops it, which
+/// deallocates the memory. The pointer must be:
+/// - Previously created by [`fts5_create_lindera_tokenizer`]
+/// - Not already freed
+/// - Not used after this call
 #[unsafe(no_mangle)]
 pub extern "C" fn fts5_delete_lindera_tokenizer(fts5_tokenizer: *mut Fts5Tokenizer) {
     let tokenizer = unsafe { Box::from_raw(fts5_tokenizer) };
     drop(tokenizer);
 }
 
+/// Module destruction callback (no-op).
+///
+/// Called by FTS5 when unregistering the tokenizer module. Since this extension
+/// has no module-level state to clean up, this function does nothing.
+///
+/// # Parameters
+///
+/// - `_module` - Module context pointer (unused)
+///
+/// # Note
+///
+/// The function name references "icu" for historical reasons but applies to
+/// the Lindera tokenizer module.
 #[unsafe(no_mangle)]
 pub extern "C" fn fts5_destroy_icu_module(_module: *mut c_void) {
     // no-op
