@@ -87,12 +87,16 @@ pub use crate::common::*;
 ///
 /// # Examples
 ///
+/// Set the configuration path environment variable before loading:
+///
+/// ```bash
+/// export LINDERA_CONFIG_PATH=./resources/lindera.yml
+/// ```
+///
+/// Then load the tokenizer:
+///
 /// ```no_run
 /// # use lindera_sqlite::load_tokenizer;
-/// // Note: set_var is unsafe in Rust 2024 edition
-/// unsafe {
-///     std::env::set_var("LINDERA_CONFIG_PATH", "./resources/lindera.yml");
-/// }
 /// let tokenizer = load_tokenizer().expect("Failed to load tokenizer");
 /// ```
 #[inline]
