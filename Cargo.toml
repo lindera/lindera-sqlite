@@ -9,7 +9,7 @@ repository = "https://github.com/lindera/lindera-sqlite"
 readme = "README.md"
 keywords = ["morphological", "analysis", "library", "sqlite"]
 categories = ["text-processing"]
-license = "AGPL-3.0-only"
+license = "MIT"
 
 [features]
 embedded-ipadic = [
