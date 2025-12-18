@@ -167,13 +167,10 @@ pub extern "C" fn lindera_fts5_tokenize(
     n_text: c_int,
     x_token: TokenFunction,
 ) -> c_int {
-    std::panic::catch_unwind(std::panic::AssertUnwindSafe(
-        || match lindera_fts5_tokenize_internal(tokenizer, p_ctx, p_text, n_text, x_token) {
-            Ok(()) => SQLITE_OK,
-            Err(code) => code,
-        },
-    ))
-    .unwrap_or(SQLITE_INTERNAL)
+    crate::common::ffi_panic_boundary(|| {
+        lindera_fts5_tokenize_internal(tokenizer, p_ctx, p_text, n_text, x_token)?;
+        Ok(())
+    })
 }
 
 /// Internal tokenization implementation.
@@ -232,34 +229,56 @@ fn lindera_fts5_tokenize_internal(
         return Ok(());
     }
 
-    let slice = unsafe { core::slice::from_raw_parts(p_text as *const c_uchar, n_text as usize) };
+    let input = unsafe { InputText::from_raw_parts(p_text, n_text)? };
+    let mut tokenizer = unsafe { TokenizerHandle::new(tokenizer)? };
+    let callback = crate::common::TokenCallback::new(p_ctx, x_token);
 
-    // Map errors to SQLITE_OK because failing here means that the database
-    // wouldn't accessible.
-    let input = core::str::from_utf8(slice).map_err(|_| SQLITE_OK)?;
+    tokenizer.emit_tokens(input.as_str(), &callback)
+}
 
-    match unsafe { (*tokenizer).tokenizer.tokenize(input) } {
-        Ok(tokens) => {
-            for token in tokens {
-                let rc = x_token(
-                    p_ctx,
-                    0,
-                    token.surface.as_bytes().as_ptr() as *const c_char,
-                    token.surface.len() as c_int,
-                    token.byte_start as c_int,
-                    token.byte_end as c_int,
-                );
-                if rc != SQLITE_OK {
-                    return Err(rc);
-                }
-            }
-        }
-        Err(_) => {
-            return Err(SQLITE_INTERNAL);
-        }
+struct TokenizerHandle<'a> {
+    inner: &'a mut Fts5Tokenizer,
+}
+
+impl<'a> TokenizerHandle<'a> {
+    unsafe fn new(ptr: *mut Fts5Tokenizer) -> Result<Self, c_int> {
+        let inner = unsafe { ptr.as_mut() }.ok_or(SQLITE_INTERNAL)?;
+        Ok(Self { inner })
     }
 
-    Ok(())
+    fn emit_tokens(
+        &mut self,
+        input: &str,
+        callback: &crate::common::TokenCallback,
+    ) -> Result<(), c_int> {
+        let tokens = self
+            .inner
+            .tokenizer
+            .tokenize(input)
+            .map_err(|_| SQLITE_INTERNAL)?;
+
+        for token in tokens {
+            callback.emit(token.surface.as_bytes(), token.byte_start, token.byte_end)?;
+        }
+
+        Ok(())
+    }
+}
+
+struct InputText<'a> {
+    text: &'a str,
+}
+
+impl<'a> InputText<'a> {
+    unsafe fn from_raw_parts(ptr: *const c_char, len: c_int) -> Result<Self, c_int> {
+        let slice = unsafe { core::slice::from_raw_parts(ptr as *const c_uchar, len as usize) };
+        let text = core::str::from_utf8(slice).map_err(|_| SQLITE_OK)?;
+        Ok(Self { text })
+    }
+
+    fn as_str(&self) -> &str {
+        self.text
+    }
 }
 
 #[cfg(test)]

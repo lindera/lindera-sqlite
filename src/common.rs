@@ -3,6 +3,8 @@
 //! This module defines the fundamental types and constants used for FFI communication
 //! between Rust and SQLite's C API.
 
+use core::convert::TryFrom;
+
 use libc::{c_char, c_int, c_void};
 
 use lindera::tokenizer::Tokenizer;
@@ -41,6 +43,65 @@ pub const SQLITE_MISUSE: c_int = 21;
 pub struct Fts5Tokenizer {
     /// The underlying Lindera tokenizer instance.
     pub tokenizer: Tokenizer,
+}
+
+/// Convenience wrapper around SQLite's token callback.
+///
+/// This helper keeps the unsafe FFI boundary localized and provides
+/// clear intent when emitting tokens from Rust back into SQLite.
+pub struct TokenCallback {
+    context: *mut c_void,
+    function: TokenFunction,
+}
+
+impl TokenCallback {
+    /// Creates a new callback wrapper using the opaque context pointer
+    /// and the C callback function provided by SQLite.
+    pub const fn new(context: *mut c_void, function: TokenFunction) -> Self {
+        Self { context, function }
+    }
+
+    /// Emits a token back to SQLite, returning any propagated SQLite
+    /// status code as an error.
+    pub fn emit(&self, token: &[u8], byte_start: usize, byte_end: usize) -> Result<(), c_int> {
+        let token_len = cast_usize_to_c_int(token.len())?;
+        let start = cast_usize_to_c_int(byte_start)?;
+        let end = cast_usize_to_c_int(byte_end)?;
+
+        let status = (self.function)(
+            self.context,
+            0,
+            token.as_ptr() as *const c_char,
+            token_len,
+            start,
+            end,
+        );
+
+        if status == SQLITE_OK {
+            Ok(())
+        } else {
+            Err(status)
+        }
+    }
+}
+
+fn cast_usize_to_c_int(value: usize) -> Result<c_int, c_int> {
+    c_int::try_from(value).map_err(|_| SQLITE_INTERNAL)
+}
+
+/// Runs an operation behind a panic boundary suitable for the SQLite FFI.
+///
+/// Any panic is translated to [`SQLITE_INTERNAL`], mirroring SQLite's
+/// expectation that FFI callbacks never unwind across the boundary.
+pub fn ffi_panic_boundary<F>(operation: F) -> c_int
+where
+    F: FnOnce() -> Result<(), c_int>,
+{
+    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(operation)) {
+        Ok(Ok(())) => SQLITE_OK,
+        Ok(Err(code)) => code,
+        Err(_) => SQLITE_INTERNAL,
+    }
 }
 
 /// Token callback function type.
