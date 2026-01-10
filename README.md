@@ -7,7 +7,7 @@ When used as a custom FTS5 tokenizer this enables application to support Chinese
 ## Build extension
 
 ```sh
-% cargo build --features=embedded-cjk
+% cargo build --features=embed-cjk
 ```
 
 ## Set enviromment variable for Lindera configuration
