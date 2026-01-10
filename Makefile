@@ -13,16 +13,16 @@ format: ## Format the code
 	cargo fmt
 
 lint: ## Run linter
-	cargo clippy --features=embedded-cjk
+	cargo clippy --features=embed-cjk
 
 build: ## Build the project
-	cargo build --release --features=embedded-cjk
+	cargo build --release --features=embed-cjk
 
 test: ## Run tests
-	LINDERA_CONFIG_PATH=./resources/lindera.yml cargo test --features=embedded-cjk
+	LINDERA_CONFIG_PATH=./resources/lindera.yml cargo test --features=embed-cjk
 
 bench: ## Run benchmarks
-	LINDERA_CONFIG_PATH=./resources/lindera.yml cargo bench --features=embedded-cjk
+	LINDERA_CONFIG_PATH=./resources/lindera.yml cargo bench --features=embed-cjk
 
 tag: ## Make a new tag for the current version
 	git tag v$(LINDERA_SQLITE_VERSION)

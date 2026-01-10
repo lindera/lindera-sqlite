@@ -1,6 +1,6 @@
 [package]
 name = "lindera-sqlite"
-version = "1.3.1"
+version = "1.4.0"
 edition = "2024"
 description = "Lindera tokenizer for SQLite FTS5 extention"
 documentation = "https://docs.rs/lindera-sqlite"
@@ -12,23 +12,23 @@ categories = ["text-processing"]
 license = "MIT"
 
 [features]
-embedded-ipadic = [
-    "lindera/embedded-ipadic",
+embed-ipadic = [
+    "lindera/embed-ipadic",
 ] # Include Japanese dictionary (IPADIC)
-embedded-ipadic-neologd = [
-    "lindera/embedded-ipadic-neologd",
+embed-ipadic-neologd = [
+    "lindera/embed-ipadic-neologd",
 ] # Include Japanese dictionary (IPADIC NEologd)
-embedded-unidic = [
-    "lindera/embedded-unidic",
+embed-unidic = [
+    "lindera/embed-unidic",
 ] # Include Japanese dictionary (UniDic)
-embedded-ko-dic = [
-    "lindera/embedded-ko-dic",
+embed-ko-dic = [
+    "lindera/embed-ko-dic",
 ] # Include Korean dictionary (ko-dic)
-embedded-cc-cedict = [
-    "lindera/embedded-cc-cedict",
+embed-cc-cedict = [
+    "lindera/embed-cc-cedict",
 ] # Include Chinese dictionary (CC-CEDICT)
-embedded-cjk = [
-    "lindera/embedded-cjk",
+embed-cjk = [
+    "lindera/embed-cjk",
 ] # Include CJK dictionary (Chinese, Japanese, Korean)
 extension = []
 default = ["extension"] # No directories included
@@ -46,14 +46,14 @@ panic = "abort"   # Abort on panic for smaller binary and faster code
 
 [dependencies]
 # libc without `std`
-libc = { version = "0.2.179", default-features = false, features = [] }
-serde_json = "1.0.148"
+libc = { version = "0.2.180", default-features = false, features = [] }
+serde_json = "1.0.149"
 sqlite-loadable = "0.0.5"
 sqlite3ext-sys = "0.0.1"
 unicode-segmentation = "1.12.0"
 unicode-normalization = "0.1.25"
 
-lindera = "1.5.1"
+lindera = "2.0.1"
 
 [dev-dependencies]
 criterion = "0.8.1"
