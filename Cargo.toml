@@ -1,6 +1,6 @@
 [package]
 name = "lindera-sqlite"
-version = "1.4.0"
+version = "2.0.0"
 edition = "2024"
 description = "Lindera tokenizer for SQLite FTS5 extention"
 documentation = "https://docs.rs/lindera-sqlite"
