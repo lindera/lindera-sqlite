@@ -165,7 +165,7 @@ jobs:
         run: cargo build --release --features=${{ matrix.features.value }} --target=${{ matrix.platform.target }} --target-dir=target/${{ matrix.features.value }}
 
       - name: Create artifact for Linux
-        if: matrix.platform.runner == 'ubuntu-latest'
+        if: runner.os == 'Linux'
         run: zip --junk-paths ${{ matrix.features.package_name }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} target/${{ matrix.features.value }}/${{ matrix.platform.target }}/release/liblindera_sqlite${{ matrix.platform.extension }}
 
       - name: Create artifact for Windows
@@ -173,7 +173,7 @@ jobs:
         run: powershell Compress-Archive -DestinationPath ${{ matrix.features.package_name }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} -Path target/${{ matrix.features.value }}/${{ matrix.platform.target }}/release/lindera_sqlite${{ matrix.platform.extension }}
 
       - name: Create artifact for OSX
-        if: matrix.platform.runner == 'macos-latest'
+        if: runner.os == 'macOS'
         run: zip --junk-paths ${{ matrix.features.package_name }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} target/${{ matrix.features.value }}/${{ matrix.platform.target }}/release/liblindera_sqlite${{ matrix.platform.extension }}
 
       - name: Upload artifact
