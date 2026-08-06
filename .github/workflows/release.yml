@@ -54,7 +54,6 @@ jobs:
             target: aarch64-pc-windows-msvc
             skip_test_run: true
         toolchain: [stable]
-        features: ["cjk"]
     runs-on: ${{ matrix.platform.runner }}
     env:
       LINDERA_CONFIG_PATH: "./resources/lindera.yml"
@@ -70,7 +69,7 @@ jobs:
           components: rustfmt, clippy
 
       - name: Run test
-        run: cargo test --target "${{ matrix.platform.target }}" --all-features ${{ matrix.platform.skip_test_run == true && '--no-run' || '' }}
+        run: cargo test --target "${{ matrix.platform.target }}" --features=embed-cjk ${{ matrix.platform.skip_test_run == true && '--no-run' || '' }}
 
   create-release:
     name: Create release
@@ -138,12 +137,15 @@ jobs:
           - value: "embed-cc-cedict"
             package_name: "lindera-sqlite-cc-cedict"
             package_description: "Python binding for Lindera with CHinese dictionary (CC-CEDICT)"
+          - value: "embed-jieba"
+            package_name: "lindera-sqlite-jieba"
+            package_description: "Python binding for Lindera with Chinese dictionary (Jieba)"
           - value: "embed-cjk"
             package_name: "lindera-sqlite"
-            package_description: "Python binding for Lindera with CJK dictionaries (IPADIC, ko-dic, CC-CEDICT)"
+            package_description: "Python binding for Lindera with CJK dictionaries (IPADIC, ko-dic, Jieba)"
     runs-on: ${{ matrix.platform.runner }}
     env:
-      LINDERA_CONFIG_PATH: "./resources/lindera.json"
+      LINDERA_CONFIG_PATH: "./resources/lindera.yml"
     permissions:
       contents: write
     steps:

@@ -7,7 +7,7 @@ use core::convert::TryFrom;
 
 use libc::{c_char, c_int, c_void};
 
-use lindera::tokenizer::Tokenizer;
+use lindera_analysis::tokenizer::Tokenizer;
 
 // sqlite3.h
 

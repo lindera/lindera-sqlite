@@ -10,6 +10,18 @@ When used as a custom FTS5 tokenizer this enables application to support Chinese
 % cargo build --features=embed-cjk
 ```
 
+Each `embed-*` feature embeds a different set of dictionaries into the built extension:
+
+| Feature | Embedded dictionaries |
+| --- | --- |
+| `embed-ipadic` | Japanese (IPADIC) |
+| `embed-ipadic-neologd` | Japanese (IPADIC NEologd) |
+| `embed-unidic` | Japanese (UniDic) |
+| `embed-ko-dic` | Korean (ko-dic) |
+| `embed-cc-cedict` | Chinese (CC-CEDICT) |
+| `embed-jieba` | Chinese (Jieba) |
+| `embed-cjk` | Japanese (IPADIC) + Korean (ko-dic) + Chinese (Jieba) |
+
 ## Set enviromment variable for Lindera configuration
 
 ```sh
