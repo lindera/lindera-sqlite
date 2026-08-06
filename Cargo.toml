@@ -13,23 +13,29 @@ license = "MIT"
 
 [features]
 embed-ipadic = [
-    "lindera/embed-ipadic",
+    "lindera-analysis/embed-ipadic",
 ] # Include Japanese dictionary (IPADIC)
 embed-ipadic-neologd = [
-    "lindera/embed-ipadic-neologd",
+    "lindera-analysis/embed-ipadic-neologd",
 ] # Include Japanese dictionary (IPADIC NEologd)
 embed-unidic = [
-    "lindera/embed-unidic",
+    "lindera-analysis/embed-unidic",
 ] # Include Japanese dictionary (UniDic)
 embed-ko-dic = [
-    "lindera/embed-ko-dic",
+    "lindera-analysis/embed-ko-dic",
 ] # Include Korean dictionary (ko-dic)
 embed-cc-cedict = [
-    "lindera/embed-cc-cedict",
+    "lindera-analysis/embed-cc-cedict",
 ] # Include Chinese dictionary (CC-CEDICT)
+embed-jieba = [
+    "lindera-analysis/embed-jieba",
+] # Include Chinese dictionary (Jieba)
 embed-cjk = [
-    "lindera/embed-cjk",
-] # Include CJK dictionary (Chinese, Japanese, Korean)
+    "embed-ipadic",
+    "embed-ko-dic",
+    "embed-jieba",
+] # Include CJK dictionaries (IPADIC, ko-dic, Jieba). Mirrors lindera 5.0.1's
+# `embed-cjk`; re-check this composition when bumping the lindera dependency.
 extension = []
 default = ["extension"] # No directories included
 
@@ -47,13 +53,10 @@ panic = "abort"   # Abort on panic for smaller binary and faster code
 [dependencies]
 # libc without `std`
 libc = { version = "0.2.180", default-features = false, features = [] }
-serde_json = "1.0.149"
 sqlite-loadable = "0.0.6-alpha.6"
 sqlite3ext-sys = "0.0.1"
-unicode-segmentation = "1.12.0"
-unicode-normalization = "0.1.25"
 
-lindera = "2.0.1"
+lindera-analysis = "5.0.1"
 
 [dev-dependencies]
 criterion = "0.8.1"

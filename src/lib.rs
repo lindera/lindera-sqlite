@@ -6,7 +6,7 @@
 //! ## Features
 //!
 //! - **CJK Language Support**: Tokenizes Chinese, Japanese, and Korean text using Lindera
-//! - **Multiple Dictionaries**: Supports various embedded dictionaries (IPADIC, UniDic, ko-dic, CC-CEDICT)
+//! - **Multiple Dictionaries**: Supports various embedded dictionaries (IPADIC, UniDic, ko-dic, CC-CEDICT, Jieba)
 //! - **Configurable**: Uses YAML configuration for character filters and token filters
 //! - **SQLite Integration**: Seamlessly integrates with SQLite's FTS5 full-text search
 //!
@@ -15,7 +15,7 @@
 //! ### Building the Extension
 //!
 //! ```bash
-//! cargo build --release --features=embedded-cjk
+//! cargo build --release --features=embed-cjk
 //! ```
 //!
 //! ### Setting Up Configuration
@@ -62,7 +62,7 @@ mod extension;
 
 use libc::{c_char, c_int, c_uchar, c_void};
 
-use lindera::tokenizer::{Tokenizer, TokenizerBuilder};
+use lindera_analysis::tokenizer::{Tokenizer, TokenizerBuilder};
 
 pub use crate::common::*;
 
