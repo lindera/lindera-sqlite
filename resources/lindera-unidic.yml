@@ -1,0 +1,33 @@
+segmenter:
+  mode: "normal"
+  dictionary: "embedded://unidic"
+  # user_dictionary:
+  #   path: "./resources/unidic_simple.csv"
+  #   kind: "unidic"
+  keep_whitespace: false
+
+character_filters:
+  - kind: "unicode_normalize"
+    args:
+      kind: "nfkc"
+  - kind: "japanese_iteration_mark"
+    args:
+      normalize_kanji: true
+      normalize_kana: true
+
+token_filters:
+  # Only the TOP-LEVEL tags, unlike the IPADIC config's deeper list. IPADIC and UniDic agree on
+  # these three but subdivide them differently below that level, so a deeper list written for one
+  # silently matches nothing in the other.
+  - kind: "japanese_stop_tags"
+    args:
+      tags:
+        - "助詞"
+        - "助動詞"
+        - "記号"
+  - kind: "japanese_katakana_stem"
+    args:
+      min: 3
+  - kind: "remove_diacritical_mark"
+    args:
+      japanese: false

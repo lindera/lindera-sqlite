@@ -124,25 +124,38 @@ jobs:
             archive: .zip
             extension: ".dll"
         toolchain: [stable]
+        # `config` is the resources/*.yml shipped inside that variant's archive. The tokenizer reads
+        # its dictionary and filter chain from this file at load time (via LINDERA_CONFIG_PATH), so
+        # each archive has to carry the one matching the dictionary it embedded — the IPADIC config
+        # names `embedded://ipadic` and filters on IPADIC part-of-speech tags, which is wrong for
+        # every other variant.
         features:
           - value: "embed-ipadic"
             package_name: "lindera-sqlite-ipadic"
             package_description: "Python binding for Lindera with Japanese dictionary (IPADIC)"
+            config: "lindera.yml"
           - value: "embed-unidic"
             package_name: "lindera-sqlite-unidic"
             package_description: "Python binding for Lindera with Japanese dictionary (Unidic)"
+            config: "lindera-unidic.yml"
           - value: "embed-ko-dic"
             package_name: "lindera-sqlite-ko-dic"
             package_description: "Python binding for Lindera with Korean dictionary (ko-dic)"
+            config: "lindera-ko-dic.yml"
           - value: "embed-cc-cedict"
             package_name: "lindera-sqlite-cc-cedict"
             package_description: "Python binding for Lindera with CHinese dictionary (CC-CEDICT)"
+            config: "lindera-cc-cedict.yml"
           - value: "embed-jieba"
             package_name: "lindera-sqlite-jieba"
             package_description: "Python binding for Lindera with Chinese dictionary (Jieba)"
+            config: "lindera-jieba.yml"
           - value: "embed-cjk"
             package_name: "lindera-sqlite"
             package_description: "Python binding for Lindera with CJK dictionaries (IPADIC, ko-dic, Jieba)"
+            # Embeds three dictionaries but a config selects ONE; IPADIC is the default, and a
+            # consumer wanting ko-dic or Jieba edits the `dictionary:` line.
+            config: "lindera.yml"
     runs-on: ${{ matrix.platform.runner }}
     env:
       LINDERA_CONFIG_PATH: "./resources/lindera.yml"
@@ -166,17 +179,24 @@ jobs:
       - name: Compile
         run: cargo build --release --features=${{ matrix.features.value }} --target=${{ matrix.platform.target }} --target-dir=target/${{ matrix.features.value }}
 
+      # The config is renamed to a plain `lindera.yml` inside every archive: which variant it came
+      # from is already in the archive's own name, and a fixed filename means the setup instructions
+      # are the same for all of them.
+      - name: Stage the tokenizer config
+        shell: bash
+        run: cp resources/${{ matrix.features.config }} lindera.yml
+
       - name: Create artifact for Linux
         if: runner.os == 'Linux'
-        run: zip --junk-paths ${{ matrix.features.package_name }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} target/${{ matrix.features.value }}/${{ matrix.platform.target }}/release/liblindera_sqlite${{ matrix.platform.extension }}
+        run: zip --junk-paths ${{ matrix.features.package_name }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} target/${{ matrix.features.value }}/${{ matrix.platform.target }}/release/liblindera_sqlite${{ matrix.platform.extension }} lindera.yml
 
       - name: Create artifact for Windows
         if: runner.os == 'Windows'
-        run: powershell Compress-Archive -DestinationPath ${{ matrix.features.package_name }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} -Path target/${{ matrix.features.value }}/${{ matrix.platform.target }}/release/lindera_sqlite${{ matrix.platform.extension }}
+        run: powershell Compress-Archive -DestinationPath ${{ matrix.features.package_name }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} -Path target/${{ matrix.features.value }}/${{ matrix.platform.target }}/release/lindera_sqlite${{ matrix.platform.extension }},lindera.yml
 
       - name: Create artifact for OSX
         if: runner.os == 'macOS'
-        run: zip --junk-paths ${{ matrix.features.package_name }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} target/${{ matrix.features.value }}/${{ matrix.platform.target }}/release/liblindera_sqlite${{ matrix.platform.extension }}
+        run: zip --junk-paths ${{ matrix.features.package_name }}-${{ matrix.platform.target }}-${{ github.ref_name }}${{ matrix.platform.archive }} target/${{ matrix.features.value }}/${{ matrix.platform.target }}/release/liblindera_sqlite${{ matrix.platform.extension }} lindera.yml
 
       - name: Upload artifact
         env:

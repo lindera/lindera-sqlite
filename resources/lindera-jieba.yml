@@ -1,0 +1,12 @@
+segmenter:
+  mode: "normal"
+  dictionary: "embedded://jieba"
+  keep_whitespace: false
+
+character_filters:
+  - kind: "unicode_normalize"
+    args:
+      kind: "nfkc"
+# No token filters, for the same reason as the CC-CEDICT config: Lindera ships no Chinese-specific
+# ones, and the Japanese/Korean stop-tag filters key on tag vocabularies this dictionary does not
+# use. The language-neutral filters (`stop_words`, `length`, `lowercase`) remain available.

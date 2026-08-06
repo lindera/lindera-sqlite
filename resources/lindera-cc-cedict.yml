@@ -1,0 +1,15 @@
+segmenter:
+  mode: "normal"
+  dictionary: "embedded://cc-cedict"
+  # user_dictionary:
+  #   path: "./resources/cc-cedict_simple.csv"
+  #   kind: "cc-cedict"
+  keep_whitespace: false
+
+character_filters:
+  - kind: "unicode_normalize"
+    args:
+      kind: "nfkc"
+# No token filters: Lindera ships no Chinese-specific ones, and the Japanese and Korean stop-tag
+# filters key on tag vocabularies CC-CEDICT does not use. Segmentation alone is the useful default
+# here; add `stop_words` or `length` (both language-neutral) if a corpus needs them.
