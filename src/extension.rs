@@ -26,10 +26,11 @@ use crate::common::*;
 use crate::lindera_fts5_tokenize;
 use crate::load_tokenizer;
 
-/// FTS5 API version supported by this extension.
+/// Minimum FTS5 API version this extension requires.
 ///
-/// This constant indicates compatibility with SQLite FTS5 API version 2.
-/// The extension will verify this version matches at runtime during initialization.
+/// Version 2 is all this extension needs — it registers a tokenizer through `xCreateTokenizer`.
+/// Newer APIs are accepted at runtime, since the structure only ever grows (see
+/// `ensure_fts5_api_version`).
 pub const FTS5_API_VERSION: c_int = 2;
 
 /// Opaque SQLite database handle.
@@ -79,11 +80,13 @@ struct Fts5TokenizerApi {
 ///
 /// # Fields
 ///
-/// - `i_version` - API version number (must be 2)
+/// - `i_version` - API version number (2 or greater; SQLite 3.47.0 and later report 3)
 /// - `x_create_tokenizer` - Function to register a new tokenizer with FTS5
 #[repr(C)]
 struct FTS5API {
-    i_version: c_int, // Currently always set to 2
+    // Only the leading members are declared here — the real struct grows with each SQLite
+    // release, and new members are always appended, so this prefix stays ABI-compatible.
+    i_version: c_int,
 
     /* Create a new tokenizer */
     x_create_tokenizer: extern "C" fn(
@@ -143,11 +146,18 @@ impl<'a> SqliteApi<'a> {
         target: &mut *mut FTS5API,
     ) -> Result<(), c_int> {
         let bind_pointer = self.raw.bind_pointer.ok_or(SQLITE_INTERNAL)?;
+        // Bind the ADDRESS of the out-variable, matching SQLite's documented pattern:
+        //
+        //     fts5_api *pRet = 0;
+        //     sqlite3_bind_pointer(pStmt, 1, (void*)&pRet, "fts5_api_ptr", NULL);
+        //
+        // `target.cast()` would auto-deref the `&mut *mut FTS5API` and pass the pointer's own
+        // (null) VALUE instead, so fts5() had nowhere to write and `p_fts5_api` stayed null.
         let rc = unsafe {
             bind_pointer(
                 stmt,
                 1,
-                target.cast::<c_void>(),
+                (&raw mut *target).cast::<c_void>(),
                 c"fts5_api_ptr".as_ptr() as *const c_char,
                 None,
             )
@@ -307,7 +317,15 @@ fn lindera_fts_tokenizer_internal_init(
 }
 
 fn ensure_fts5_api_version(fts5_api: &FTS5API) -> Result<(), c_int> {
-    if fts5_api.i_version == FTS5_API_VERSION {
+    // Accept any API at or above the version this extension targets, rather than an exact match.
+    //
+    // SQLite 3.47.0 raised `fts5_api.iVersion` from 2 to 3 (adding `fts5_tokenizer_v2` with
+    // `xCreateTokenizer_v2` / `xFindTokenizer_v2`), so an equality test rejects every SQLite
+    // released since. The change is purely additive — `xCreateTokenizer`, the only entry point
+    // this extension uses, is unchanged and keeps its position in the struct, with the v2 members
+    // appended after `xCreateFunction`. Only an OLDER API, missing members we rely on, is a
+    // genuine mismatch.
+    if fts5_api.i_version >= FTS5_API_VERSION {
         Ok(())
     } else {
         Err(SQLITE_MISUSE)
