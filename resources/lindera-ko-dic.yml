@@ -1,0 +1,24 @@
+segmenter:
+  mode: "normal"
+  dictionary: "embedded://ko-dic"
+  # user_dictionary:
+  #   path: "./resources/ko-dic_simple.csv"
+  #   kind: "ko-dic"
+  keep_whitespace: false
+
+character_filters:
+  # Only the language-neutral normaliser: `japanese_iteration_mark` has nothing to do here.
+  - kind: "unicode_normalize"
+    args:
+      kind: "nfkc"
+
+token_filters:
+  # ko-dic's own stop-tag filter, not the Japanese one — the tag vocabulary is entirely different.
+  # EP/EF are verb endings and JKG is the possessive particle: the Korean counterparts of the
+  # 助動詞/助詞 the IPADIC config drops.
+  - kind: "korean_stop_tags"
+    args:
+      tags:
+        - "EP"
+        - "EF"
+        - "JKG"
