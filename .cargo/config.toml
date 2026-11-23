@@ -1,0 +1,5 @@
+[env]
+# The extension calls SQLite only through the API routines it receives when it is loaded, so it must
+# not link to a system libsqlite3. Without this, the build script of libsqlite3-sys asks pkg-config
+# for sqlite3 and links to the library it finds.
+SQLITE3_NO_PKG_CONFIG = "1"

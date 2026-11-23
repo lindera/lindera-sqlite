@@ -34,7 +34,7 @@ embed-cjk = [
     "embed-ipadic",
     "embed-ko-dic",
     "embed-jieba",
-] # Include CJK dictionaries (IPADIC, ko-dic, Jieba). Mirrors lindera 5.0.1's
+] # Include CJK dictionaries (IPADIC, ko-dic, Jieba). Mirrors lindera 7.0.0's
 # `embed-cjk`; re-check this composition when bumping the lindera dependency.
 extension = []
 default = ["extension"] # No directories included
@@ -52,14 +52,15 @@ panic = "abort"   # Abort on panic for smaller binary and faster code
 
 [dependencies]
 # libc without `std`
-libc = { version = "0.2.180", default-features = false, features = [] }
-sqlite-loadable = "0.0.6-alpha.6"
-sqlite3ext-sys = "0.0.1"
+libc = { version = "0.2.191", default-features = false, features = [] }
+# Pre-generated bindings (no libclang at build time) for the API routines SQLite passes to a
+# loadable extension
+libsqlite3-sys = { version = "0.40.0", features = ["loadable_extension"] }
 
-lindera-analysis = "5.0.1"
+lindera-analysis = "7.0.0"
 
 [dev-dependencies]
-criterion = "0.8.1"
+criterion = "0.8.2"
 
 [[bench]]
 name = "bench"

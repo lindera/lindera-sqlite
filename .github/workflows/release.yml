@@ -56,7 +56,7 @@ jobs:
         toolchain: [stable]
     runs-on: ${{ matrix.platform.runner }}
     env:
-      LINDERA_CONFIG_PATH: "./resources/lindera.yml"
+      LINDERA_CONFIG_FILE: "./resources/lindera.yml"
     steps:
       - name: Run checkout
         uses: actions/checkout@v4
@@ -125,7 +125,7 @@ jobs:
             extension: ".dll"
         toolchain: [stable]
         # `config` is the resources/*.yml shipped inside that variant's archive. The tokenizer reads
-        # its dictionary and filter chain from this file at load time (via LINDERA_CONFIG_PATH), so
+        # its dictionary and filter chain from this file at load time (via LINDERA_CONFIG_FILE), so
         # each archive has to carry the one matching the dictionary it embedded — the IPADIC config
         # names `embedded://ipadic` and filters on IPADIC part-of-speech tags, which is wrong for
         # every other variant.
@@ -158,7 +158,7 @@ jobs:
             config: "lindera.yml"
     runs-on: ${{ matrix.platform.runner }}
     env:
-      LINDERA_CONFIG_PATH: "./resources/lindera.yml"
+      LINDERA_CONFIG_FILE: "./resources/lindera.yml"
     permissions:
       contents: write
     steps:
@@ -214,7 +214,7 @@ jobs:
         toolchain: [stable]
     runs-on: ${{ matrix.platform.runner }}
     env:
-      LINDERA_CONFIG_PATH: "./resources/lindera.yml"
+      LINDERA_CONFIG_FILE: "./resources/lindera.yml"
     steps:
       - name: Checkout
         uses: actions/checkout@v4

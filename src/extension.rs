@@ -35,13 +35,13 @@ pub const FTS5_API_VERSION: c_int = 2;
 
 /// Opaque SQLite database handle.
 ///
-/// Use the type provided by sqlite-loadable for ABI compatibility.
-pub type Sqlite3 = sqlite_loadable::prelude::sqlite3;
+/// Use the type provided by libsqlite3-sys for ABI compatibility.
+pub type Sqlite3 = libsqlite3_sys::sqlite3;
 
 /// Opaque SQLite prepared statement handle.
 ///
-/// Use the type provided by sqlite3ext-sys for ABI compatibility.
-type Sqlite3Stmt = sqlite3ext_sys::sqlite3_stmt;
+/// Use the type provided by libsqlite3-sys for ABI compatibility.
+type Sqlite3Stmt = libsqlite3_sys::sqlite3_stmt;
 
 /// FTS5 tokenizer API structure.
 ///
@@ -100,10 +100,10 @@ struct FTS5API {
 
 /// SQLite extension API function table provided by SQLite.
 ///
-/// Reuse the `sqlite-loadable` FFI definition instead of maintaining a massive
+/// Reuse the `libsqlite3-sys` FFI definition instead of maintaining a massive
 /// hand-written struct. Its layout matches SQLite's `sqlite3_api_routines` ABI,
 /// so this alias is sufficient.
-pub type Sqlite3APIRoutines = sqlite_loadable::prelude::sqlite3_api_routines;
+pub type Sqlite3APIRoutines = libsqlite3_sys::sqlite3_api_routines;
 
 struct SqliteApi<'a> {
     raw: &'a Sqlite3APIRoutines,
@@ -430,4 +430,40 @@ pub extern "C" fn fts5_delete_lindera_tokenizer(fts5_tokenizer: *mut Fts5Tokeniz
 #[unsafe(no_mangle)]
 pub extern "C" fn fts5_destroy_icu_module(_module: *mut c_void) {
     // no-op
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use core::mem::{offset_of, size_of};
+
+    /// Checks the positions of the routines this extension calls against `sqlite3ext.h`.
+    ///
+    /// SQLite only ever appends to `sqlite3_api_routines`, so these positions hold for every
+    /// version. Bindings that disagree would call a different routine than the intended one.
+    #[test]
+    fn it_matches_the_sqlite_api_routine_positions() {
+        let positions = [
+            ("finalize", offset_of!(Sqlite3APIRoutines, finalize)),
+            (
+                "libversion_number",
+                offset_of!(Sqlite3APIRoutines, libversion_number),
+            ),
+            ("prepare", offset_of!(Sqlite3APIRoutines, prepare)),
+            ("step", offset_of!(Sqlite3APIRoutines, step)),
+            ("bind_pointer", offset_of!(Sqlite3APIRoutines, bind_pointer)),
+        ]
+        .map(|(name, offset)| (name, offset / size_of::<*const c_void>()));
+
+        assert_eq!(
+            positions,
+            [
+                ("finalize", 57),
+                ("libversion_number", 67),
+                ("prepare", 72),
+                ("step", 94),
+                ("bind_pointer", 219),
+            ]
+        );
+    }
 }
