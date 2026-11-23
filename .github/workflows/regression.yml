@@ -32,6 +32,10 @@ jobs:
       - name: Check format
         run: cargo fmt --all -- --check
 
+      # `e2e` is a package of its own, which `cargo fmt --all` does not cover.
+      - name: Check format of the end-to-end test
+        run: cargo fmt --manifest-path e2e/Cargo.toml -- --check
+
   test:
     name: Test
     needs: [format]
@@ -68,3 +72,15 @@ jobs:
 
       - name: Run test
         run: cargo test --target "${{ matrix.platform.target }}" --features=embed-cjk ${{ matrix.platform.skip_test_run == true && '--no-run' || '' }}
+
+      - name: Build extension
+        if: matrix.platform.skip_test_run != true
+        run: cargo build --target "${{ matrix.platform.target }}" --features=embed-cjk
+
+      # The test runs in the directory of its package, so both paths are absolute.
+      - name: Load extension into SQLite
+        if: matrix.platform.skip_test_run != true
+        env:
+          LINDERA_CONFIG_FILE: "${{ github.workspace }}/resources/lindera.yml"
+          LINDERA_SQLITE_LIB_DIR: "${{ github.workspace }}/target/${{ matrix.platform.target }}/debug"
+        run: cargo test --manifest-path e2e/Cargo.toml

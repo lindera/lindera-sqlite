@@ -1,0 +1,12 @@
+[package]
+name = "lindera-sqlite-e2e"
+version = "0.0.0"
+edition = "2024"
+description = "Loads the lindera-sqlite extension into SQLite"
+license = "MIT"
+publish = false
+
+# This is a package of its own, and not a test of lindera-sqlite: Cargo would unify the features of
+# libsqlite3-sys, and rusqlite does not compile with the `loadable_extension` of lindera-sqlite.
+[dev-dependencies]
+rusqlite = { version = "0.43.0", features = ["bundled", "load_extension"] }

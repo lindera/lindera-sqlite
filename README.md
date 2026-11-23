@@ -82,3 +82,12 @@ sqlite> INSERT INTO example(content) VALUES ("Ｌｉｎｄｅｒａは形態素�
 ```sql
 sqlite> SELECT * FROM example WHERE content MATCH "Lindera" ORDER BY bm25(example) LIMIT 10;
 ```
+
+## Test
+
+Run the unit tests, and load the built extension into SQLite to index and search with it:
+
+```sh
+% make test
+% make e2e
+```

@@ -4,11 +4,13 @@
 
 version: 2
 updates:
-  # Rust crate (Cargo.lock is not committed).
+  # Rust crate and its end-to-end test (Cargo.lock is not committed).
   # Minor and patch updates are grouped into a single PR to reduce noise;
   # major updates still get individual PRs for careful review.
   - package-ecosystem: cargo
-    directory: /
+    directories:
+      - /
+      - /e2e
     schedule:
       interval: daily
     commit-message:

@@ -11,6 +11,7 @@ clean: ## Clean the project
 
 format: ## Format the code
 	cargo fmt
+	cargo fmt --manifest-path e2e/Cargo.toml
 
 lint: ## Run linter
 	cargo clippy --features=embed-cjk
@@ -20,6 +21,12 @@ build: ## Build the project
 
 test: ## Run tests
 	LINDERA_CONFIG_FILE=./resources/lindera.yml cargo test --features=embed-cjk
+
+# Without this, make takes the directory of the same name for an up-to-date target.
+.PHONY: e2e
+e2e: ## Load the extension into SQLite and test it
+	cargo build --features=embed-cjk
+	LINDERA_CONFIG_FILE=$(CURDIR)/resources/lindera.yml LINDERA_SQLITE_LIB_DIR=$(CURDIR)/target/debug cargo test --manifest-path e2e/Cargo.toml
 
 bench: ## Run benchmarks
 	LINDERA_CONFIG_FILE=./resources/lindera.yml cargo bench --features=embed-cjk
