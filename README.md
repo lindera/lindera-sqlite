@@ -9,7 +9,7 @@ When used as a custom FTS5 tokenizer this enables application to support Chinese
 Every [release](https://github.com/lindera/lindera-sqlite/releases) publishes a per-platform, per-dictionary archive containing the shared library and a `lindera.yml` matching the dictionary that archive embedded. Unpack it and point `LINDERA_CONFIG_FILE` at that file:
 
 ```sh
-% unzip lindera-sqlite-x86_64-unknown-linux-gnu-v2.0.0.zip
+% unzip lindera-sqlite-x86_64-unknown-linux-gnu-v7.0.0.zip
 % export LINDERA_CONFIG_FILE=./lindera.yml
 ```
 
