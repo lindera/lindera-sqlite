@@ -6,11 +6,11 @@ When used as a custom FTS5 tokenizer this enables application to support Chinese
 
 ## Use a prebuilt extension
 
-Every [release](https://github.com/lindera/lindera-sqlite/releases) publishes a per-platform, per-dictionary archive containing the shared library and a `lindera.yml` matching the dictionary that archive embedded. Unpack it and point `LINDERA_CONFIG_PATH` at that file:
+Every [release](https://github.com/lindera/lindera-sqlite/releases) publishes a per-platform, per-dictionary archive containing the shared library and a `lindera.yml` matching the dictionary that archive embedded. Unpack it and point `LINDERA_CONFIG_FILE` at that file:
 
 ```sh
-% unzip lindera-sqlite-x86_64-unknown-linux-gnu-v2.0.0.zip
-% export LINDERA_CONFIG_PATH=./lindera.yml
+% unzip lindera-sqlite-x86_64-unknown-linux-gnu-v7.0.0.zip
+% export LINDERA_CONFIG_FILE=./lindera.yml
 ```
 
 Then skip to [Load extension](#load-extension), using the unpacked library path.
@@ -38,7 +38,7 @@ Each `embed-*` feature embeds a different set of dictionaries into the built ext
 When building from source, use the config in `resources/` matching the feature you built. `resources/lindera.yml` is the IPADIC one, used by `embed-ipadic` and `embed-cjk`:
 
 ```sh
-% export LINDERA_CONFIG_PATH=./resources/lindera.yml
+% export LINDERA_CONFIG_FILE=./resources/lindera.yml
 ```
 
 | Feature | Configuration |
@@ -50,6 +50,8 @@ When building from source, use the config in `resources/` matching the feature y
 | `embed-jieba` | `resources/lindera-jieba.yml` |
 
 `embed-cjk` embeds three dictionaries, but a configuration selects one; edit the `dictionary:` line to use ko-dic or Jieba instead.
+
+The former name of the variable, `LINDERA_CONFIG_PATH`, still works with Lindera 7, which prints a deprecation warning on standard error; Lindera 8 removes it.
 
 ## Then start SQLite
 

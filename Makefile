@@ -19,10 +19,10 @@ build: ## Build the project
 	cargo build --release --features=embed-cjk
 
 test: ## Run tests
-	LINDERA_CONFIG_PATH=./resources/lindera.yml cargo test --features=embed-cjk
+	LINDERA_CONFIG_FILE=./resources/lindera.yml cargo test --features=embed-cjk
 
 bench: ## Run benchmarks
-	LINDERA_CONFIG_PATH=./resources/lindera.yml cargo bench --features=embed-cjk
+	LINDERA_CONFIG_FILE=./resources/lindera.yml cargo bench --features=embed-cjk
 
 tag: ## Make a new tag for the current version
 	git tag v$(LINDERA_SQLITE_VERSION)

@@ -51,7 +51,7 @@ jobs:
         toolchain: [stable, beta, nightly]
     runs-on: ${{ matrix.platform.runner }}
     env:
-      LINDERA_CONFIG_PATH: "./resources/lindera.yml"
+      LINDERA_CONFIG_FILE: "./resources/lindera.yml"
     steps:
       - name: Run checkout
         uses: actions/checkout@v4

@@ -20,10 +20,10 @@
 //!
 //! ### Setting Up Configuration
 //!
-//! Set the `LINDERA_CONFIG_PATH` environment variable to point to your Lindera configuration file:
+//! Set the `LINDERA_CONFIG_FILE` environment variable to point to your Lindera configuration file:
 //!
 //! ```bash
-//! export LINDERA_CONFIG_PATH=./resources/lindera.yml
+//! export LINDERA_CONFIG_FILE=./resources/lindera.yml
 //! ```
 //!
 //! ### Loading in SQLite
@@ -69,7 +69,7 @@ pub use crate::common::*;
 /// Loads and initializes a Lindera tokenizer.
 ///
 /// This function creates a new Lindera tokenizer using the configuration specified
-/// by the `LINDERA_CONFIG_PATH` environment variable. The configuration file controls
+/// by the `LINDERA_CONFIG_FILE` environment variable. The configuration file controls
 /// segmentation mode, character filters, and token filters.
 ///
 /// # Returns
@@ -90,7 +90,7 @@ pub use crate::common::*;
 /// Set the configuration path environment variable before loading:
 ///
 /// ```bash
-/// export LINDERA_CONFIG_PATH=./resources/lindera.yml
+/// export LINDERA_CONFIG_FILE=./resources/lindera.yml
 /// ```
 ///
 /// Then load the tokenizer:
