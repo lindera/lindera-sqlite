@@ -172,10 +172,6 @@ jobs:
           target: ${{ matrix.platform.target }}
           components: rustfmt, clippy
 
-      - name: Add msbuild to PATH
-        if: matrix.platform.target == 'windows-latest'
-        uses: microsoft/setup-msbuild@v3
-
       - name: Compile
         run: cargo build --release --features=${{ matrix.features.value }} --target=${{ matrix.platform.target }} --target-dir=target/${{ matrix.features.value }}
 
